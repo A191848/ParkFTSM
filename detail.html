@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ParkFTSM</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+     * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body {
+      background-color: #f0f5ff;
+      color: #333;
+      overflow-x: hidden;
+    }
+    
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+    
+    header {
+      background: linear-gradient(135deg, #1a73e8, #0d47a1);
+      color: white;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .logo i {
+      font-size: 24px;
+    }
+    
+    .logo h1 {
+      font-size: 22px;
+      font-weight: 600;
+    }
+    
+    nav ul {
+      display: flex;
+      list-style: none;
+      gap: 20px;
+    }
+    
+    nav a {
+      color: white;
+      text-decoration: none;
+      font-weight: 500;
+      padding: 8px 12px;
+      border-radius: 20px;
+      transition: all 0.3s ease;
+    }
+    
+    nav a:hover, nav a.active {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    
+    .main-content {
+      font-family: "Microsoft YaHei", sans-serif;
+      text-align: center;
+      padding-top: 15px;
+      margin: 0;
+    }
+    
+    h1 {
+      font-size: 40px;
+      margin-bottom: 15px;
+    }
+    
+    .info {
+      margin-bottom: 15px;
+      padding: 0 10px;
+    }
+    
+    .parking-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 0 10px;
+    }
+    
+    .parking-lot {
+      display: grid;
+      grid-template-columns: repeat(16, 60px);
+      justify-content: center;
+      gap: 8px;
+    }
+    
+    .spot {
+      width: 60px;
+      height: 100px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 18px;
+    }
+    
+    .available {
+      background-color: #4caf50;
+    }
+    
+    .occupied {
+      background-color: #f44336;
+    }
+    
+    .road {
+      width: calc(60px * 16 + 8px * 15);
+      height: 25px;
+      background-color: #ddd;
+      line-height: 25px;
+      margin: 8px 0;
+      border-radius: 5px;
+    }
+    
+    .status-box {
+      background-color: #1f9def;
+      border-radius: 15px;
+      padding: 10px 30px;
+      color: white;
+      display: inline-block;
+      text-align: center;
+      margin: 10px;
+      width: 80%;
+      max-width: 400px;
+    }
+    
+    .status-title {
+      font-size: 30px;
+      margin: 8px;
+    }
+    
+    .available-count {
+      font-size: 50px;
+      font-weight: bold;
+      margin: 10px;
+    }
+    
+    .update-time {
+      font-size: 16px;
+      margin: 8px;
+    }
+
+    @media (max-width: 768px) {
+      header {
+        flex-direction: column;
+        gap: 15px;
+      }
+      
+      nav ul {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      
+      h1 {
+        font-size: 32px;
+        margin-bottom: 10px;
+      }
+      
+      .parking-lot {
+        grid-template-columns: repeat(8, 45px);
+        gap: 6px;
+      }
+      
+      .spot {
+        width: 45px;
+        height: 70px;
+        font-size: 16px;
+        border-radius: 6px;
+      }
+      
+      .road {
+        width: calc(45px * 8 + 6px * 7);
+        height: 20px;
+        font-size: 14px;
+      }
+      
+      .status-box {
+        padding: 8px 15px;
+      }
+      
+      .status-title {
+        font-size: 24px;
+      }
+      
+      .available-count {
+        font-size: 40px;
+      }
+      
+      .update-time {
+        font-size: 14px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .parking-lot {
+        grid-template-columns: repeat(6, 40px);
+        gap: 5px;
+      }
+      
+      .spot {
+        width: 40px;
+        height: 60px;
+        font-size: 14px;
+      }
+      
+      .road {
+        width: calc(40px * 6 + 5px * 5);
+        font-size: 12px;
+      }
+      
+      h1 {
+        font-size: 28px;
+      }
+      
+      .status-title {
+        font-size: 20px;
+      }
+      
+      .available-count {
+        font-size: 36px;
+      }
+    }
+    .back-link {
+      display: inline-block;
+      margin-top: 80px;
+      padding: 10px 20px;
+      background: #1a73e8;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+    }
+    footer {
+      background: #1a2530;
+      color: #e0e0e0;
+      padding: 30px 20px;
+      margin-top: 50px;
+    }
+    
+    .footer-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 30px;
+    }
+    
+    .footer-section h3 {
+      color: white;
+      margin-bottom: 15px;
+      font-size: 18px;
+    }
+    
+    .footer-section p {
+      line-height: 1.6;
+      margin-bottom: 10px;
+    }
+    .copyright {
+      text-align: center;
+      padding-top: 20px;
+      margin-top: 20px;
+      border-top: 1px solid #2c3e50;
+      color: #aaa;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <h1>ParkFTSM</h1>
+    </div>
+    <nav>
+      <ul>
+        <li><a href="index.html"><i class="fas fa-home"></i> Home</a></li>
+        <li><a href="app-release.apk" class="download-btn" download><i class="fas fa-download"></i> Download Android App</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <div class="main-content">
+    <div class="info">
+      <div class="status-box">
+        <p class="status-title">Available</p>
+        <p class="available-count" id="summary">--</p>
+        <p class="update-time" id="timestamp">Updated: --</p>
+      </div>
+    </div>
+
+    <div class="parking-container">
+      <div class="parking-lot" id="lot-top"></div>
+      <div class="road">Road</div>
+      <div class="parking-lot" id="lot-bottom"></div>
+    </div>
+    <a href="index.html" class="back-link">Back to Home</a>
+  </div>
+  
+  <footer>
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>About ParkFTSM</h3>
+        <p>Faculty of Information Science & Technology parking management system, providing real-time parking information.</p>
+        <p>Integrated with Google Maps services to provide you with the best parking preview experience.</p>
+      </div>
+      
+      <div class="footer-section">
+        <h3>Contact Information</h3>
+        <p><i class="fas fa-map-marker-alt"></i>Faculty of Information Science & Technology,Universiti Kebangsaan Malaysia, 43600 Bangi Selangor, MALAYSIA</p>
+      </div>
+      
+      <div class="footer-section">
+        <h3>Quick Links</h3>
+        <p><a href="https://ftsm.ukm.my/v6/">Faculty Website</a></p>
+        <p><a href="https://ftsm.ukm.my/v6/faculty-map">Faculty Map</a></p>
+      </div>
+    </div>
+    
+    <div class="copyright">
+      &copy; 2025 ParkFTSM - Faculty of Information Science & Technology. All rights reserved.
+    </div>
+  </footer>
+  
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAKAW5juTlDRapvINjkk5CiNCoR_Pd-Sx0",
+      authDomain: "parkftsm.firebaseapp.com",
+      databaseURL: "https://parkftsm-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "parkftsm",
+      storageBucket: "parkftsm.appspot.com",
+      messagingSenderId: "644940903318",
+      appId: "1:644940903318:web:8db429688123cef8faa3b7",
+      measurementId: "G-XHE1WYMKTB"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    const timestampEl = document.getElementById('timestamp');
+    const summaryEl = document.getElementById('summary');
+    const lotTop = document.getElementById('lot-top');
+    const lotBottom = document.getElementById('lot-bottom');
+
+    function createSpot(id) {
+      const div = document.createElement('div');
+      div.className = 'spot';
+      div.id = `spot-${id}`;
+      div.textContent = id;
+      return div;
+    }
+
+    // Initialize parking spots (1-16 top row, 17-31 bottom row)
+    for (let i = 1; i <= 16; i++) {
+      lotTop.appendChild(createSpot(i));
+    }
+    for (let i = 17; i <= 31; i++) {
+      lotBottom.appendChild(createSpot(i));
+    }
+
+    function formatRelativeTime(timestampStr) {
+      const parts = timestampStr.split('_');
+      if (parts.length !== 2) return 'Updated: --';
+
+      const [datePart, timePart] = parts;
+      const year = datePart.slice(0, 4);
+      const month = datePart.slice(4, 6);
+      const day = datePart.slice(6, 8);
+      const hour = timePart.slice(0, 2);
+      const minute = timePart.slice(2, 4);
+      const second = timePart.slice(4, 6);
+
+      const fullDate = new Date(`${year}-${month}-${day}T${hour}:${minute}:${second}`);
+      const now = new Date();
+      const diffMs = now - fullDate;
+      const diffSec = Math.floor(diffMs / 1000);
+      const diffMin = Math.floor(diffSec / 60);
+      const diffHr = Math.floor(diffMin / 60);
+
+      if (diffSec < 30) return 'Updated: Just now';
+      if (diffMin < 1) return `Updated: ${diffSec} seconds ago`;
+      if (diffHr < 1) return `Updated: ${diffMin} minutes ago`;
+      if (diffHr < 24) return `Updated: ${diffHr} hours ago`;
+      return 'Updated: ' + fullDate.toLocaleString();
+    }
+
+    const statusRef = database.ref('parking_status');
+
+    statusRef.on('value', (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        timestampEl.textContent = formatRelativeTime(data.timestamp);
+        summaryEl.textContent = data.available_spots;
+
+        const availableIds = new Set(data.available_spot_ids || []);
+        for (let i = 1; i <= data.total_spots; i++) {
+          const spotEl = document.getElementById(`spot-${i}`);
+          if (spotEl) {
+            spotEl.className = 'spot ' + (availableIds.has(i) ? 'available' : 'occupied');
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>

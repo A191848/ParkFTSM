@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <title>ParkFTSM </title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+     * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body {
+      background-color: #f0f5ff;
+      color: #333;
+      overflow-x: hidden;
+    }
+    a {
+    color: inherit; /* 继承父元素的颜色 */
+    text-decoration: none; /* 去除下划线 */
+    }
+    header {
+      background: linear-gradient(135deg, #1a73e8, #0d47a1);
+      color: white;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .logo i {
+      font-size: 24px;
+    }
+    
+    .logo h1 {
+      font-size: 22px;
+      font-weight: 600;
+    }
+    
+    nav ul {
+      display: flex;
+      list-style: none;
+      gap: 20px;
+    }
+    
+    nav a {
+      color: white;
+      text-decoration: none;
+      font-weight: 500;
+      padding: 8px 12px;
+      border-radius: 20px;
+      transition: all 0.3s ease;
+    }
+    
+    nav a:hover, nav a.active {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 0 20px;
+    }
+    
+    .page-title {
+      margin-bottom: 20px;
+      color: #1a73e8;
+      font-size: 28px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .page-title i {
+      background: #e8f0fe;
+      padding: 10px;
+      border-radius: 50%;
+    }
+    
+    /* 首页地图样式 */
+    #map-container {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+      overflow: hidden;
+      height: 70vh;
+      margin-bottom: 30px;
+    }
+    
+    #map {
+      width: 100%;
+      height: 100%;
+    }
+    
+    .info-box {
+      background: white;
+      border-radius: 12px;
+      padding: 15px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      margin-bottom: 25px;
+    }
+    
+    .info-box h3 {
+      color: #1a73e8;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .parking-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+    
+    .parking-card {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      transition: transform 0.3s ease;
+    }
+    
+    .parking-card:hover {
+      transform: translateY(-5px);
+    }
+    
+    .card-header {
+      background: linear-gradient(135deg, #1a73e8, #0d47a1);
+      color: white;
+      padding: 15px;
+    }
+    
+    .card-body {
+      padding: 15px;
+    }
+    
+    .parking-stats {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 15px;
+    }
+    
+    .stat-item {
+      text-align: center;
+    }
+    
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: #1a73e8;
+    }
+    
+    .stat-label {
+      font-size: 14px;
+      color: #666;
+    }
+    
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      background: #1a73e8;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      text-align: center;
+      text-decoration: none;
+    }
+    
+    .btn:hover {
+      background: #0d47a1;
+    }
+    
+    /* 详情页样式 */
+    .detail-container {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+      overflow: hidden;
+    }
+    
+    .detail-header {
+      background: linear-gradient(135deg, #1a73e8, #0d47a1);
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+    
+    .detail-header h2 {
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+    
+    .status-box {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 15px;
+      padding: 15px;
+      max-width: 300px;
+      margin: 15px auto;
+    }
+    
+    .status-title {
+      font-size: 18px;
+      margin-bottom: 5px;
+    }
+    
+    .available-count {
+      font-size: 48px;
+      font-weight: 700;
+      margin: 10px 0;
+    }
+    
+    .update-time {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+    
+    .parking-detail {
+      padding: 20px;
+    }
+    
+    .parking-lot {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    
+    .spot {
+      height: 60px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 16px;
+    }
+    
+    .available {
+      background-color: #4caf50;
+    }
+    
+    .occupied {
+      background-color: #f44336;
+    }
+    
+    .road {
+      background-color: #bdbdbd;
+      height: 30px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #333;
+      font-weight: bold;
+      margin: 10px 0;
+      grid-column: span 8;
+    }
+    
+    .no-data {
+      text-align: center;
+      padding: 50px 20px;
+      color: #666;
+    }
+    
+    .no-data i {
+      font-size: 64px;
+      margin-bottom: 20px;
+      color: #bdbdbd;
+    }
+    
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      margin: 20px 0;
+      padding: 10px 20px;
+      background: #f0f5ff;
+      border: none;
+      border-radius: 8px;
+      color: #1a73e8;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .back-btn:hover {
+      background: #e1ebff;
+    }
+    
+    footer {
+      background: #1a2530;
+      color: #e0e0e0;
+      padding: 30px 20px;
+      margin-top: 50px;
+    }
+    
+    .footer-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 30px;
+    }
+    
+    .footer-section h3 {
+      color: white;
+      margin-bottom: 15px;
+      font-size: 18px;
+    }
+    
+    .footer-section p {
+      line-height: 1.6;
+      margin-bottom: 10px;
+    }
+    
+    .social-links {
+      display: flex;
+      gap: 15px;
+      margin-top: 15px;
+    }
+    
+    .social-links a {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      background: #2c3e50;
+      border-radius: 50%;
+      color: white;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+    
+    .social-links a:hover {
+      background: #1a73e8;
+      transform: translateY(-3px);
+    }
+    
+    .copyright {
+      text-align: center;
+      padding-top: 20px;
+      margin-top: 20px;
+      border-top: 1px solid #2c3e50;
+      color: #aaa;
+      font-size: 14px;
+    }
+    
+    @media (max-width: 768px) {
+      header {
+        flex-direction: column;
+        gap: 15px;
+      }
+      
+      nav ul {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      
+      .parking-lot {
+        grid-template-columns: repeat(4, 1fr);
+      }
+      
+      .road {
+        grid-column: span 4;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .parking-lot {
+        grid-template-columns: repeat(3, 1fr);
+      }
+      
+      .road {
+        grid-column: span 3;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <h1>ParkFTSM</h1>
+    </div>
+    <nav>
+      <ul>
+        <li><a href="#" class="active"><i class="fas fa-home"></i> Home</a></li>
+        <li><a href="app-release.apk" class="download-btn" download><i class="fas fa-download"></i> Download Android App</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <div class="container">
+    <div id="home-page">
+      <h2 class="page-title"><i class="fas fa-map"></i> Parking Map</h2>
+      
+      <div id="map-container">
+        <div id="map"></div>
+      </div>
+      
+      <div class="parking-grid"></div>  
+    </div>
+  </div>
+  
+  <footer>
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>About ParkFTSM</h3>
+        <p>Faculty of Information Science & Technology parking management system, providing real-time parking information.</p>
+        <p>Integrated with Google Maps services to provide you with the best parking preview experience.</p>
+      </div>
+      
+      <div class="footer-section">
+        <h3>Contact Information</h3>
+        <p><i class="fas fa-map-marker-alt"></i>Faculty of Information Science & Technology,Universiti Kebangsaan Malaysia, 43600 Bangi Selangor, MALAYSIA</p>
+      </div>
+      
+      <div class="footer-section">
+        <h3>Quick Links</h3>
+        <p><a href="https://ftsm.ukm.my/v6/">Faculty Website</a></p>
+        <p><a href="https://ftsm.ukm.my/v6/faculty-map">Faculty Map</a></p>
+      </div>
+    </div>
+    
+    <div class="copyright">
+      &copy; 2025 ParkFTSM - Faculty of Information Science & Technology. All rights reserved.
+    </div>
+  </footer>
+
+  <script>
+    // Firebase 初始化
+    const firebaseConfig = {
+      apiKey: "AIzaSyAKAW5juTlDRapvINjkk5CiNCoR_Pd-Sx0",
+      authDomain: "parkftsm.firebaseapp.com",
+      databaseURL: "https://parkftsm-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "parkftsm",
+      storageBucket: "parkftsm.appspot.com",
+      messagingSenderId: "644940903318",
+      appId: "1:644940903318:web:8db429688123cef8faa3b7",
+      measurementId: "G-XHE1WYMKTB"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    let map;
+    let activeInfoWindow = null;
+    let hoverTimer;
+
+    function formatTimestamp(ts) {
+      if (!ts || ts.length !== 15) return 'Unknown time';
+      const date = ts.substring(0, 8);
+      const time = ts.substring(9);
+      return `${date.slice(0, 4)}-${date.slice(4, 6)}-${date.slice(6, 8)} ${time.slice(0, 2)}:${time.slice(2, 4)}:${time.slice(4, 6)}`;
+    }
+
+    function initMap() {
+      const center = { lat: 2.9184247117302258, lng: 101.77160188303225 };
+
+      map = new google.maps.Map(document.getElementById('map'), {
+        zoom: 16,
+        center: center,
+        styles: [ { featureType: "administrative", elementType: "labels.text.fill", stylers: [{ color: "#444444" }] },
+        { featureType: "landscape", elementType: "all", stylers: [{ color: "#f2f2f2" }] },
+        { featureType: "poi", elementType: "all", stylers: [{ visibility: "off" }] },
+        { featureType: "road", elementType: "all", stylers: [{ saturation: -100 }, { lightness: 45 }] },
+        { featureType: "road.highway", elementType: "all", stylers: [{ visibility: "simplified" }] },
+        { featureType: "road.arterial", elementType: "labels.icon", stylers: [{ visibility: "off" }] },
+        { featureType: "transit", elementType: "all", stylers: [{ visibility: "off" }] },
+        { featureType: "water", elementType: "all", stylers: [{ color: "#c6e0f5" }, { visibility: "on" }] } ]
+      });
+
+      const parkingLots = [
+        { id: 1, title: 'North Parking', position: { lat: 2.9187940705907818, lng: 101.77192715132439 }, hasData: true },
+        { id: 2, title: 'Main Parking', position: { lat: 2.918649168283044, lng: 101.7713382545039 }, hasData: false },
+        { id: 3, title: 'Roadside Parking 1', position: { lat: 2.918258756953049, lng: 101.77079040037397 }, hasData: false },
+        { id: 4, title: 'Roadside Parking 2', position: { lat: 2.9173386768829683, lng: 101.77093934069882 }, hasData: false },
+        { id: 5, title: 'Roadside Parking 3', position: { lat: 2.9176604192183206, lng: 101.77071446671246 }, hasData: false }
+      ];
+
+      parkingLots.forEach(lot => {
+        const marker = new google.maps.Marker({
+          position: lot.position,
+          map: map,
+          title: lot.title,
+          icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            fillColor: lot.hasData ? '#4CAF50' : '#BDBDBD',
+            fillOpacity: 0.8,
+            strokeColor: '#FFFFFF',
+            strokeWeight: 1,
+            scale: 10
+          }
+        });
+
+        const infoWindow = new google.maps.InfoWindow({ content: 'Loading...' });
+
+        marker.addListener('mouseover', () => {
+          if (activeInfoWindow) activeInfoWindow.close();
+          if (hoverTimer) clearTimeout(hoverTimer);
+
+          if (lot.hasData) {
+            db.ref('parking_status').once('value').then(snapshot => {
+              const data = snapshot.val();
+              const available = data?.available_spots ?? 'N/A';
+              const total = data?.total_spots ?? 'N/A';
+              const time = formatTimestamp(data?.timestamp);
+
+              infoWindow.setContent(`
+                <div style="padding: 10px; text-align: center;">
+                  <h4>${lot.title}</h4>
+                  <p>Available: ${available}/${total}</p>
+                  <p style="font-size: 12px; color: #777;">Updated: ${time}</p>
+                  <p style="margin-top: 5px; font-size: 13px; color: #555;">Click marker for details</p>
+                </div>
+              `);
+              infoWindow.open(map, marker);
+              activeInfoWindow = infoWindow;
+            });
+          } else {
+            infoWindow.setContent(`
+              <div style="padding: 10px; text-align: center;">
+                <h4>${lot.title}</h4>
+                <p style="color: #999;">No data available</p>
+                <p style="margin-top: 5px; font-size: 13px; color: #555;">Click marker for details</p>
+              </div>
+            `);
+            infoWindow.open(map, marker);
+            activeInfoWindow = infoWindow;
+          }
+        });
+
+        marker.addListener('mouseout', () => {
+          if (hoverTimer) clearTimeout(hoverTimer);
+          hoverTimer = setTimeout(() => {
+            if (activeInfoWindow) {
+              activeInfoWindow.close();
+              activeInfoWindow = null;
+            }
+          }, 400);
+        });
+
+        marker.addListener('click', () => {
+          if (lot.hasData) {
+            window.location.href = `detail.html?lot=${lot.id}`;
+          } else {
+            window.location.href = `nodata.html?lot=${lot.id}`;
+          }
+        });
+      });
+    }
+
+    function handleMapError() {
+      document.getElementById('map').innerHTML = `
+        <div style="display: flex; align-items: center; justify-content: center; height: 100%; flex-direction: column; color: #666;">
+          <i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 20px; color: #ff9800;"></i>
+          <h3>Map loading failed</h3>
+          <p>Please check your network connection or try again later</p>
+        </div>`;
+    }
+
+    window.gm_authFailure = handleMapError;
+
+    document.addEventListener('DOMContentLoaded', function () {
+      const script = document.createElement('script');
+      script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyBz0mVYKSu_HR32UebG-wOKnrF7FjG3mWk&callback=initMap&libraries=geometry`;
+      script.async = true;
+      script.defer = true;
+      script.onerror = handleMapError;
+      document.head.appendChild(script);
+    });
+  </script>
+</body>
+</html>
