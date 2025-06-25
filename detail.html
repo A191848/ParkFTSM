@@ -99,7 +99,7 @@
     .parking-lot {
       display: flex;
       flex-wrap: nowrap;
-      justify-content: center;
+      justify-content: flex-start;
       gap: 8px;
     }
     
@@ -133,13 +133,13 @@
     }
     
     .road {
-      min-width: fit-content;
+      width: calc(60px * 16 + 8px * 15);
       height: 25px;
       background-color: #ddd;
       line-height: 25px;
       margin: 8px 0;
       border-radius: 5px;
-      padding: 0 20px;
+      text-align: center;
     }
     
     .status-box {
@@ -198,6 +198,7 @@
       }
       
       .road {
+        width: calc(45px * 16 + 6px * 15);
         height: 20px;
         font-size: 14px;
       }
@@ -231,6 +232,7 @@
       }
       
       .road {
+        width: calc(35px * 16 + 4px * 15);
         font-size: 12px;
       }
       
@@ -256,6 +258,10 @@
       
       .parking-lot {
         gap: 3px;
+      }
+      
+      .road {
+        width: calc(30px * 16 + 3px * 15);
       }
     }
     
