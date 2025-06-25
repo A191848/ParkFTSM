@@ -18,7 +18,7 @@
     body {
       background-color: #f0f5ff;
       color: #333;
-      overflow-x: hidden;
+      overflow-x: auto;
     }
     
     a {
@@ -93,13 +93,22 @@
       align-items: center;
       gap: 8px;
       padding: 0 10px;
+      min-width: fit-content;
     }
     
     .parking-lot {
-      display: grid;
-      grid-template-columns: repeat(16, 60px);
+      display: flex;
+      flex-wrap: nowrap;
       justify-content: center;
       gap: 8px;
+    }
+    
+    .parking-lot#lot-top {
+      /* 北侧16个车位 */
+    }
+    
+    .parking-lot#lot-bottom {
+      /* 南侧15个车位 */
     }
     
     .spot {
@@ -112,6 +121,7 @@
       color: white;
       font-weight: bold;
       font-size: 18px;
+      flex-shrink: 0;
     }
     
     .available {
@@ -123,12 +133,13 @@
     }
     
     .road {
-      width: calc(60px * 16 + 8px * 15);
+      min-width: fit-content;
       height: 25px;
       background-color: #ddd;
       line-height: 25px;
       margin: 8px 0;
       border-radius: 5px;
+      padding: 0 20px;
     }
     
     .status-box {
@@ -175,11 +186,6 @@
         margin-bottom: 10px;
       }
       
-      .parking-lot {
-        grid-template-columns: repeat(8, 45px);
-        gap: 6px;
-      }
-      
       .spot {
         width: 45px;
         height: 70px;
@@ -187,8 +193,11 @@
         border-radius: 6px;
       }
       
+      .parking-lot {
+        gap: 6px;
+      }
+      
       .road {
-        width: calc(45px * 8 + 6px * 7);
         height: 20px;
         font-size: 14px;
       }
@@ -211,19 +220,17 @@
     }
 
     @media (max-width: 480px) {
-      .parking-lot {
-        grid-template-columns: repeat(6, 40px);
-        gap: 5px;
-      }
-      
       .spot {
-        width: 40px;
+        width: 35px;
         height: 60px;
         font-size: 14px;
       }
       
+      .parking-lot {
+        gap: 4px;
+      }
+      
       .road {
-        width: calc(40px * 6 + 5px * 5);
         font-size: 12px;
       }
       
@@ -239,6 +246,19 @@
         font-size: 36px;
       }
     }
+    
+    @media (max-width: 400px) {
+      .spot {
+        width: 30px;
+        height: 50px;
+        font-size: 12px;
+      }
+      
+      .parking-lot {
+        gap: 3px;
+      }
+    }
+    
     .back-link {
       display: inline-block;
       margin-top: 80px;
